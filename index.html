@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Flip iPhone">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e1020">
+<title>Flip iPhone – zyski i straty</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#0e1020;--card:#161a2e;--line:#262b45;--tx:#e8eaf6;--mut:#8a90b0;--ok:#34d399;--bad:#f87171;--acc:#6366f1;--sel:rgba(99,102,241,.14)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f3f4fa;--card:#fff;--line:#dfe2ef;--tx:#1a1d33;--mut:#6b7090;--ok:#0f9d6b;--bad:#dc2626;--acc:#4f46e5;--sel:rgba(79,70,229,.1)}}
+:root[data-theme="light"]{--bg:#f3f4fa;--card:#fff;--line:#dfe2ef;--tx:#1a1d33;--mut:#6b7090;--ok:#0f9d6b;--bad:#dc2626;--acc:#4f46e5;--sel:rgba(79,70,229,.1)}
+:root[data-theme="dark"]{--bg:#0e1020;--card:#161a2e;--line:#262b45;--tx:#e8eaf6;--mut:#8a90b0;--ok:#34d399;--bad:#f87171;--acc:#6366f1;--sel:rgba(99,102,241,.14)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px;max-width:1200px;margin-inline:auto}
+h1{font-size:20px;margin:0 0 12px}h2{font-size:15px;margin:20px 0 8px}
+.nav{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+.nav select{flex:1;min-width:0;font-weight:600;font-size:15px}
+.nav button{width:40px;padding:0;flex:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat small{color:var(--mut);display:block}.stat b{font-size:18px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+input,select,button{height:40px;font:inherit;border-radius:8px}
+input,select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);padding:0 10px}
+input:focus,select:focus{outline:2px solid var(--acc);border-color:transparent}
+button{background:var(--acc);color:#fff;border:0;padding:0 16px;font-weight:600;cursor:pointer}
+button.add{width:100%}
+input[type=date]{min-width:0;display:block;text-align:left;-webkit-appearance:none;appearance:none;padding:0 8px;line-height:38px}
+td input[type=date]{line-height:32px;padding:0 6px}
+input[type=date]::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%}
+#t1{min-width:900px}#t2{min-width:560px}
+th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td input,td select,td button{height:34px;font-size:13px}
+td input[type=number]{width:96px}td input[type=date]{width:150px}td select{width:132px}
+td button.ghost{width:34px;padding:0;background:transparent;color:var(--mut);border:1px solid var(--line);font-weight:400}
+td button.ghost.conf{width:84px;background:var(--bad);color:#fff;border-color:var(--bad);font-weight:600}
+.m small{display:block;color:var(--mut)}
+.pos{color:var(--ok);font-weight:700}.neg{color:var(--bad);font-weight:700}
+.bar{display:inline-block;width:40px;height:5px;border-radius:3px;background:var(--line);vertical-align:middle;margin-right:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok)}
+.empty{padding:24px;text-align:center;color:var(--mut)}
+tfoot td{font-weight:700;border-top:1px solid var(--line)}
+#months tr{cursor:pointer}#months tr.on{background:var(--sel)}
+@media (max-width:820px){input,select{font-size:16px!important}}
+body{-webkit-text-size-adjust:100%}
+.bk{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button.alt{background:transparent;color:var(--tx);border:1px solid var(--line)}
+.bmsg{font-size:13px;margin-top:10px;min-height:18px;color:var(--mut)}.bmsg.ok{color:var(--ok)}.bmsg.bad{color:var(--bad)}
+</style></head><body>
+<h1>📱 Flip iPhone – zyski i straty</h1>
+<div class="nav"><button id="prev" title="Poprzedni miesiąc">‹</button><select id="msel"></select><button id="next" title="Następny miesiąc">›</button></div>
+<div class="stats" id="stats"></div>
+<div class="card">
+<div class="form">
+<div><label>Model</label><input id="model" list="models" placeholder="iPhone 14 Pro Max"></div>
+<div><label>Kolor</label><input id="color" placeholder="Fioletowy"></div>
+<div><label>Pamięć</label><select id="gb"><option>64</option><option selected>128</option><option>256</option><option>512</option><option>1024</option></select></div>
+<div><label>Stan</label><select id="cond"><option>Bardzo dobry</option><option>Dobry</option><option>Idealny</option><option>Uszkodzony</option></select></div>
+<div><label>Bateria %</label><input id="bat" type="number" min="0" max="100" placeholder="85"></div>
+<div><label>Data kupna</label><input id="d1" type="date"></div>
+<div><label>Cena kupna (zł)</label><input id="cost" type="number" step="any" placeholder="1100"></div>
+<div><label>Cena sprzedaży (zł)</label><input id="price" type="number" step="any" placeholder="1500"></div>
+<div><label>Data sprzedaży</label><input id="d2" type="date"></div>
+<div><label>Status</label><select id="st"><option value="mag">W magazynie</option><option value="sold">Sprzedane</option></select></div>
+<div style="align-self:end"><button class="add" id="add">Dodaj telefon</button></div>
+</div></div>
+<datalist id="models"></datalist>
+
+<h2 id="h-list">Telefony</h2>
+<div class="wrap"><table id="t1"><thead><tr><th>Urządzenie</th><th>Stan</th><th>Bateria</th><th>Kupno</th><th>Sprzedaż</th><th>Dni</th><th>Koszt</th><th>Cena</th><th>Marża</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+
+<h2>Wszystkie miesiące (kliknij, by wybrać)</h2>
+<div class="wrap"><table id="t2"><thead><tr><th>Miesiąc</th><th>Kupione</th><th>Wydano</th><th>Sprzedane</th><th>Przychód</th><th>Zysk / strata</th></tr></thead><tbody id="months"></tbody><tfoot id="mfoot"></tfoot></table></div>
+<h2>Kopia zapasowa</h2>
+<div class="card"><div class="bk">
+<button id="bexp">⬇ Eksportuj do pliku</button>
+<button id="bimp" class="alt">⬆ Importuj z pliku</button>
+<input id="bfile" type="file" accept="application/json,.json,text/plain" hidden>
+</div><div id="bmsg" class="bmsg"></div></div>
+<script>
+var KEY="flip_v1",S={items:[]};
+try{var r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+function iso(t){var d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+var TODAY=iso(Date.now()),CUR=TODAY.slice(0,7);
+S.items.forEach(function(x){if(!x.bought)x.bought=iso(x.added||Date.now());if(x.st=="sold"&&!x.soldOn)x.soldOn=iso(x.sold||Date.now())});
+if(!S.sel)S.sel=CUR;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var M=[];[11,12,13,14,15,16].forEach(function(n){["","Mini","Plus","Pro","Pro Max"].forEach(function(v){if(n==11&&(v=="Mini"||v=="Plus"))return;if(n>=14&&v=="Mini")return;if(n<14&&v=="Plus")return;M.push(("iPhone "+n+" "+v).trim())})});
+M.push("iPhone SE (2022)","iPhone XR");
+var $=function(i){return document.getElementById(i)};
+$("models").innerHTML=M.map(function(m){return '<option value="'+m+'">'}).join("");
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function zl(n){return Math.round(n).toLocaleString("pl-PL")+" zł"}
+function sg(n){return (n>0?"+":"")+zl(n)}
+function cls(n){return n>=0?"pos":"neg"}
+var MN=["styczeń","luty","marzec","kwiecień","maj","czerwiec","lipiec","sierpień","wrzesień","październik","listopad","grudzień"];
+function mname(k){var p=k.split("-");return MN[+p[1]-1]+" "+p[0]}
+function defDate(){return S.sel=="all"||S.sel==CUR?TODAY:S.sel+"-01"}
+function mkeys(){var o={};o[CUR]=1;S.items.forEach(function(x){o[x.bought.slice(0,7)]=1;if(x.st=="sold"&&x.soldOn)o[x.soldOn.slice(0,7)]=1});return Object.keys(o).sort().reverse()}
+function stats(k){var a={b:0,spent:0,s:0,rev:0,p:0};S.items.forEach(function(x){
+ if(k=="all"||x.bought.slice(0,7)==k){a.b++;a.spent+=x.cost}
+ if(x.st=="sold"&&(k=="all"||(x.soldOn||x.bought).slice(0,7)==k)){a.s++;a.rev+=x.price;a.p+=x.price-x.cost}});return a}
+function setSel(k){S.sel=k;save();$("d1").value=defDate();render()}
+$("msel").onchange=function(){setSel(this.value)};
+$("prev").onclick=function(){var k=mkeys().reverse(),i=k.indexOf(S.sel);if(S.sel=="all")i=k.length;if(i>0)setSel(k[i-1])};
+$("next").onclick=function(){var k=mkeys().reverse(),i=k.indexOf(S.sel);if(i>=0&&i<k.length-1)setSel(k[i+1])};
+$("price").addEventListener("input",function(){if(this.value){$("st").value="sold";if(!$("d2").value)$("d2").value=defDate()}});
+$("st").addEventListener("change",function(){if(this.value=="sold"&&!$("d2").value)$("d2").value=defDate()});
+$("add").onclick=function(){
+ var model=$("model").value.trim();
+ $("model").oninput=function(){this.style.borderColor=""};
+ if(!model){$("model").style.borderColor="var(--bad)";$("model").focus();return}
+ var st=$("st").value;
+ S.items.unshift({id:Date.now(),model:model,color:$("color").value.trim(),gb:$("gb").value,cond:$("cond").value,bat:$("bat").value,cost:+$("cost").value||0,price:+$("price").value||0,st:st,bought:$("d1").value||defDate(),soldOn:st=="sold"?($("d2").value||defDate()):""});
+ save();["model","color","bat","cost","price","d2"].forEach(function(i){$(i).value=""});$("st").value="mag";$("d1").value=defDate();render();$("model").focus()};
+function upd(id,k,v){var it=S.items.find(function(x){return x.id==id});if(!it)return;
+ if(k=="cost"||k=="price")v=+v||0;
+ it[k]=v;
+ if(k=="st")it.soldOn=v=="sold"?(it.soldOn||TODAY):"";
+ if(k=="soldOn"&&v)it.st="sold";
+ save();render()}
+var PD=null,PT;function del(id){if(PD===id){clearTimeout(PT);PD=null;S.items=S.items.filter(function(x){return x.id!=id});save();render()}else{PD=id;render();clearTimeout(PT);PT=setTimeout(function(){PD=null;render()},3000)}}
+function render(){
+ var keys=mkeys(),sel=S.sel,all=sel=="all";
+ if(!all&&keys.indexOf(sel)<0)sel=S.sel=CUR;
+ $("msel").innerHTML='<option value="all"'+(all?" selected":"")+'>Wszystkie miesiące</option>'+keys.map(function(k){return '<option value="'+k+'"'+(k==sel?" selected":"")+'>'+mname(k)+'</option>'}).join("");
+ var list=S.items.filter(function(x){return all||x.bought.slice(0,7)==sel||(x.st=="sold"&&(x.soldOn||"").slice(0,7)==sel)});
+ $("h-list").textContent="Telefony – "+(all?"wszystkie":mname(sel));
+ $("rows").innerHTML=list.length?list.map(function(x){
+  var isS=x.st=="sold",m=x.price-x.cost;
+  var days=Math.max(0,Math.round((new Date(isS&&x.soldOn?x.soldOn:TODAY)-new Date(x.bought))/864e5));
+  return '<tr><td class="m"><b>'+esc(x.model)+'</b><small>'+esc(x.color)+(x.color?" · ":"")+esc(x.gb)+' GB</small></td><td>'+esc(x.cond)+'</td><td>'+(x.bat!==""&&x.bat!=null?'<span class="bar"><i style="width:'+Math.min(100,+x.bat)+'%"></i></span>'+esc(x.bat)+'%':'—')+'</td>'
+  +'<td><input type="date" value="'+esc(x.bought)+'" onchange="upd('+x.id+',\'bought\',this.value)"></td>'
+  +'<td><input type="date" value="'+esc(x.soldOn||"")+'" onchange="upd('+x.id+',\'soldOn\',this.value)"></td><td>'+days+'</td>'
+  +'<td><input type="number" step="any" value="'+x.cost+'" onchange="upd('+x.id+',\'cost\',this.value)"></td>'
+  +'<td><input type="number" step="any" value="'+x.price+'" onchange="upd('+x.id+',\'price\',this.value)"></td>'
+  +'<td class="'+cls(m)+'">'+sg(m)+'</td>'
+  +'<td><select onchange="upd('+x.id+',\'st\',this.value)"><option value="mag"'+(isS?"":" selected")+'>W magazynie</option><option value="sold"'+(isS?" selected":"")+'>Sprzedane</option></select></td>'
+  +'<td><button class="ghost'+(PD===x.id?" conf":"")+'" onclick="del('+x.id+')" title="Usuń">'+(PD===x.id?"Na pewno?":"✕")+'</button></td></tr>'}).join(""):'<tr><td colspan="11" class="empty">Brak telefonów w tym miesiącu</td></tr>';
+ var T={b:0,spent:0,s:0,rev:0,p:0};
+ $("months").innerHTML=keys.map(function(k){var a=stats(k);for(var i in T)T[i]+=a[i];
+  return '<tr class="'+(k==sel?"on":"")+'" onclick="setSel(\''+k+'\')"><td><b>'+mname(k)+'</b></td><td>'+a.b+'</td><td>'+zl(a.spent)+'</td><td>'+a.s+'</td><td>'+zl(a.rev)+'</td><td class="'+cls(a.p)+'">'+sg(a.p)+'</td></tr>'}).join("");
+ $("mfoot").innerHTML='<tr><td>Razem</td><td>'+T.b+'</td><td>'+zl(T.spent)+'</td><td>'+T.s+'</td><td>'+zl(T.rev)+'</td><td class="'+cls(T.p)+'">'+sg(T.p)+'</td></tr>';
+ var c=stats(sel),stk=S.items.filter(function(x){return x.st!="sold"}),sv=stk.reduce(function(a,x){return a+x.cost},0);
+ $("stats").innerHTML=[["Zysk w miesiącu",'<span class="'+cls(c.p)+'">'+sg(c.p)+'</span>'],["Na stanie (teraz)",stk.length+" szt."],["Wartość stanu",zl(sv)],["Sprzedane",c.s+" szt."],["Kupione",c.b+" szt."],["Wydano na zakupy",zl(c.spent)],["Przychód",zl(c.rev)],["Śr. marża / szt.",zl(c.s?c.p/c.s:0)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><b>'+s[1]+'</b></div>'}).join("")}
+$("d1").value=defDate();render();
+</script><script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+<script>
+(function(){
+var msg=function(t,c){var m=document.getElementById("bmsg");m.textContent=t;m.className="bmsg "+(c||"")};
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function dl(name,data){var a=document.createElement("a"),u=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);msg("Zapisano plik "+name,"ok")}
+document.getElementById("bexp").onclick=function(){
+ var name="flip-iphone-kopia-"+today()+".json";
+ var data=JSON.stringify({app:"flip-iphone",v:1,exported:new Date().toISOString(),items:S.items},null,1);
+ var f;try{f=new File([data],name,{type:"application/json"})}catch(e){}
+ if(f&&navigator.canShare&&navigator.canShare({files:[f]})){
+  navigator.share({files:[f],title:name}).then(function(){msg("Wyeksportowano "+S.items.length+" telefonów. Wybierz „Zapisz w Plikach”.","ok")}).catch(function(e){if(e&&e.name!=="AbortError")dl(name,data)});
+ }else dl(name,data)};
+document.getElementById("bimp").onclick=function(){document.getElementById("bfile").click()};
+document.getElementById("bfile").onchange=function(){
+ var file=this.files[0],inp=this;if(!file)return;
+ var rd=new FileReader();
+ rd.onload=function(){
+  try{
+   var j=JSON.parse(rd.result),arr=Array.isArray(j)?j:j.items;
+   if(!Array.isArray(arr))throw 0;
+   arr=arr.filter(function(x){return x&&typeof x==="object"&&x.model});
+   if(!arr.length){msg("Plik nie zawiera żadnych telefonów","bad");return}
+   var rep=confirm("Znaleziono telefonów: "+arr.length+".\n\nOK = ZASTĄP obecne dane danymi z pliku\nAnuluj = DOŁĄCZ tylko nowe telefony");
+   if(rep){S.items=arr}else{var ids={};S.items.forEach(function(x){ids[x.id]=1});var n=0;arr.forEach(function(x){if(!ids[x.id]){S.items.push(x);n++}});arr=new Array(n)}
+   S.items.forEach(function(x,i){if(!x.id)x.id=Date.now()+i;x.cost=+x.cost||0;x.price=+x.price||0;if(!x.bought)x.bought=today();if(x.st!=="sold")x.st="mag";if(x.st==="sold"&&!x.soldOn)x.soldOn=x.bought});
+   save();render();
+   msg((rep?"Zastąpiono dane – telefonów: ":"Dołączono nowych telefonów: ")+(rep?S.items.length:arr.length),"ok");
+  }catch(e){msg("Nieprawidłowy plik kopii zapasowej","bad")}
+  inp.value=""};
+ rd.readAsText(file)};
+})();
+</script>
+</body></html>
