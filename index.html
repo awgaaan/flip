@@ -56,13 +56,22 @@ body{-webkit-text-size-adjust:100%}
 .bk{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 button.alt{background:transparent;color:var(--tx);border:1px solid var(--line)}
 .bmsg{font-size:13px;margin-top:10px;min-height:18px;color:var(--mut)}.bmsg.ok{color:var(--ok)}.bmsg.bad{color:var(--bad)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.seg button{background:transparent;color:var(--mut);border:1px solid var(--line)}
+.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pf{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;height:40px;overflow:hidden}
+.pf:focus-within{outline:2px solid var(--acc);border-color:transparent}
+.pf span{padding:0 6px 0 10px;color:var(--mut);font-weight:600}
+.pf input{border:0;background:transparent;height:38px;padding-left:0;outline:0!important}
+td .pf{height:34px;width:190px}td .pf input{height:32px;font-size:14px;font-weight:600}td .pf span{font-size:13px}
+td input.bt{width:70px}
 </style></head><body>
 <h1>📱 Flip iPhone – zyski i straty</h1>
 <div class="nav"><button id="prev" title="Poprzedni miesiąc">‹</button><select id="msel"></select><button id="next" title="Następny miesiąc">›</button></div>
 <div class="stats" id="stats"></div>
 <div class="card">
 <div class="form">
-<div><label>Model</label><input id="model" list="models" placeholder="iPhone 14 Pro Max"></div>
+<div><label>Model</label><div class="pf"><span>iPhone</span><input id="model" list="models" placeholder="14 Pro Max"></div></div>
 <div><label>Kolor</label><input id="color" placeholder="Fioletowy"></div>
 <div><label>Pamięć</label><select id="gb"><option>64</option><option selected>128</option><option>256</option><option>512</option><option>1024</option></select></div>
 <div><label>Stan</label><select id="cond"><option>Bardzo dobry</option><option>Dobry</option><option>Idealny</option><option>Uszkodzony</option></select></div>
@@ -77,6 +86,7 @@ button.alt{background:transparent;color:var(--tx);border:1px solid var(--line)}
 <datalist id="models"></datalist>
 
 <h2 id="h-list">Telefony</h2>
+<div class="seg" id="seg"><button data-f="all"></button><button data-f="mag"></button></div>
 <div class="wrap"><table id="t1"><thead><tr><th>Urządzenie</th><th>Stan</th><th>Bateria</th><th>Kupno</th><th>Sprzedaż</th><th>Dni</th><th>Koszt</th><th>Cena</th><th>Marża</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
 
 <h2>Wszystkie miesiące (kliknij, by wybrać)</h2>
@@ -98,7 +108,8 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 var M=[];[11,12,13,14,15,16].forEach(function(n){["","Mini","Plus","Pro","Pro Max"].forEach(function(v){if(n==11&&(v=="Mini"||v=="Plus"))return;if(n>=14&&v=="Mini")return;if(n<14&&v=="Plus")return;M.push(("iPhone "+n+" "+v).trim())})});
 M.push("iPhone SE (2022)","iPhone XR");
 var $=function(i){return document.getElementById(i)};
-$("models").innerHTML=M.map(function(m){return '<option value="'+m+'">'}).join("");
+$("models").innerHTML=M.map(function(m){return '<option value="'+m.replace(/^iPhone /,"")+'">'}).join("");
+function nm(v){return String(v==null?"":v).replace(/^\s*iphone\s*/i,"").trim()}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function zl(n){return Math.round(n).toLocaleString("pl-PL")+" zł"}
 function sg(n){return (n>0?"+":"")+zl(n)}
@@ -117,13 +128,15 @@ $("next").onclick=function(){var k=mkeys().reverse(),i=k.indexOf(S.sel);if(i>=0&
 $("price").addEventListener("input",function(){if(this.value){$("st").value="sold";if(!$("d2").value)$("d2").value=defDate()}});
 $("st").addEventListener("change",function(){if(this.value=="sold"&&!$("d2").value)$("d2").value=defDate()});
 $("add").onclick=function(){
- var model=$("model").value.trim();
+ var model=nm($("model").value);if(model)model="iPhone "+model;
  $("model").oninput=function(){this.style.borderColor=""};
  if(!model){$("model").style.borderColor="var(--bad)";$("model").focus();return}
  var st=$("st").value;
  S.items.unshift({id:Date.now(),model:model,color:$("color").value.trim(),gb:$("gb").value,cond:$("cond").value,bat:$("bat").value,cost:+$("cost").value||0,price:+$("price").value||0,st:st,bought:$("d1").value||defDate(),soldOn:st=="sold"?($("d2").value||defDate()):""});
  save();["model","color","bat","cost","price","d2"].forEach(function(i){$(i).value=""});$("st").value="mag";$("d1").value=defDate();render();$("model").focus()};
 function upd(id,k,v){var it=S.items.find(function(x){return x.id==id});if(!it)return;
+ if(k=="model"){v=nm(v);if(!v){render();return}v="iPhone "+v}
+ if(k=="bat")v=v===""?"":Math.max(0,Math.min(100,+v||0));
  if(k=="cost"||k=="price")v=+v||0;
  it[k]=v;
  if(k=="st")it.soldOn=v=="sold"?(it.soldOn||TODAY):"";
@@ -134,19 +147,22 @@ function render(){
  var keys=mkeys(),sel=S.sel,all=sel=="all";
  if(!all&&keys.indexOf(sel)<0)sel=S.sel=CUR;
  $("msel").innerHTML='<option value="all"'+(all?" selected":"")+'>Wszystkie miesiące</option>'+keys.map(function(k){return '<option value="'+k+'"'+(k==sel?" selected":"")+'>'+mname(k)+'</option>'}).join("");
- var list=S.items.filter(function(x){return all||x.bought.slice(0,7)==sel||(x.st=="sold"&&(x.soldOn||"").slice(0,7)==sel)});
- $("h-list").textContent="Telefony – "+(all?"wszystkie":mname(sel));
+ var base=S.items.filter(function(x){return all||x.bought.slice(0,7)==sel||(x.st=="sold"&&(x.soldOn||"").slice(0,7)==sel)});
+ var fm=S.flt=="mag",list=fm?base.filter(function(x){return x.st!="sold"}):base;
+ var sb=$("seg").children;sb[0].textContent="Wszystkie ("+base.length+")";sb[1].textContent="Na stanie ("+base.filter(function(x){return x.st!="sold"}).length+")";
+ sb[0].className=fm?"":"on";sb[1].className=fm?"on":"";
+ $("h-list").textContent="Telefony – "+(all?"wszystkie miesiące":mname(sel))+(fm?" (na stanie)":"");
  $("rows").innerHTML=list.length?list.map(function(x){
   var isS=x.st=="sold",m=x.price-x.cost;
   var days=Math.max(0,Math.round((new Date(isS&&x.soldOn?x.soldOn:TODAY)-new Date(x.bought))/864e5));
-  return '<tr><td class="m"><b>'+esc(x.model)+'</b><small>'+esc(x.color)+(x.color?" · ":"")+esc(x.gb)+' GB</small></td><td>'+esc(x.cond)+'</td><td>'+(x.bat!==""&&x.bat!=null?'<span class="bar"><i style="width:'+Math.min(100,+x.bat)+'%"></i></span>'+esc(x.bat)+'%':'—')+'</td>'
+  return '<tr><td class="m"><div class="pf"><span>iPhone</span><input value="'+esc(nm(x.model))+'" onchange="upd('+x.id+',\'model\',this.value)"></div><small>'+esc(x.color)+(x.color?" · ":"")+esc(x.gb)+' GB</small></td><td>'+esc(x.cond)+'</td><td><span class="bar"><i style="width:'+Math.min(100,+x.bat||0)+'%"></i></span><input class="bt" type="number" min="0" max="100" placeholder="—" value="'+esc(x.bat)+'" onchange="upd('+x.id+',\'bat\',this.value)"> %</td>'
   +'<td><input type="date" value="'+esc(x.bought)+'" onchange="upd('+x.id+',\'bought\',this.value)"></td>'
   +'<td><input type="date" value="'+esc(x.soldOn||"")+'" onchange="upd('+x.id+',\'soldOn\',this.value)"></td><td>'+days+'</td>'
   +'<td><input type="number" step="any" value="'+x.cost+'" onchange="upd('+x.id+',\'cost\',this.value)"></td>'
   +'<td><input type="number" step="any" value="'+x.price+'" onchange="upd('+x.id+',\'price\',this.value)"></td>'
   +'<td class="'+cls(m)+'">'+sg(m)+'</td>'
   +'<td><select onchange="upd('+x.id+',\'st\',this.value)"><option value="mag"'+(isS?"":" selected")+'>W magazynie</option><option value="sold"'+(isS?" selected":"")+'>Sprzedane</option></select></td>'
-  +'<td><button class="ghost'+(PD===x.id?" conf":"")+'" onclick="del('+x.id+')" title="Usuń">'+(PD===x.id?"Na pewno?":"✕")+'</button></td></tr>'}).join(""):'<tr><td colspan="11" class="empty">Brak telefonów w tym miesiącu</td></tr>';
+  +'<td><button class="ghost'+(PD===x.id?" conf":"")+'" onclick="del('+x.id+')" title="Usuń">'+(PD===x.id?"Na pewno?":"✕")+'</button></td></tr>'}).join(""):'<tr><td colspan="11" class="empty">'+(fm?"Brak telefonów na stanie":"Brak telefonów w tym miesiącu")+'</td></tr>';
  var T={b:0,spent:0,s:0,rev:0,p:0};
  $("months").innerHTML=keys.map(function(k){var a=stats(k);for(var i in T)T[i]+=a[i];
   return '<tr class="'+(k==sel?"on":"")+'" onclick="setSel(\''+k+'\')"><td><b>'+mname(k)+'</b></td><td>'+a.b+'</td><td>'+zl(a.spent)+'</td><td>'+a.s+'</td><td>'+zl(a.rev)+'</td><td class="'+cls(a.p)+'">'+sg(a.p)+'</td></tr>'}).join("");
@@ -154,7 +170,8 @@ function render(){
  var c=stats(sel),stk=S.items.filter(function(x){return x.st!="sold"}),sv=stk.reduce(function(a,x){return a+x.cost},0);
  $("stats").innerHTML=[["Zysk w miesiącu",'<span class="'+cls(c.p)+'">'+sg(c.p)+'</span>'],["Na stanie (teraz)",stk.length+" szt."],["Wartość stanu",zl(sv)],["Sprzedane",c.s+" szt."],["Kupione",c.b+" szt."],["Wydano na zakupy",zl(c.spent)],["Przychód",zl(c.rev)],["Śr. marża / szt.",zl(c.s?c.p/c.s:0)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><b>'+s[1]+'</b></div>'}).join("")}
 $("d1").value=defDate();render();
-</script><script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</script><script>document.getElementById('seg').onclick=function(e){var f=e.target.getAttribute('data-f');if(f){S.flt=f;save();render()}};</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
 <script>
 (function(){
 var msg=function(t,c){var m=document.getElementById("bmsg");m.textContent=t;m.className="bmsg "+(c||"")};
